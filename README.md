@@ -16,4 +16,4 @@ This project was created to practice adaptive website coding through HTML and CS
 
 Deployed using GitHub Pages.
 
--  Link:
+-  [Deployment Link](https://c-drivers.github.io/se_project_spots/)
