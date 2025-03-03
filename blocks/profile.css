@@ -10,6 +10,8 @@
   margin-right: 20px;
   height: 190px;
   width: 190px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 
 .profile__column {
@@ -22,10 +24,9 @@
   font-weight: 500;
   font-size: 32px;
   line-height: 1;
-  color: rgb(21, 21, 21);
+  color: #212121;
   text-overflow: ellipsis;
   overflow: hidden;
-  line-clamp: 3;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -34,11 +35,12 @@
 
 .profile__description {
   margin: 0;
+  font-size: 16px;
+  line-height: 16px;
   font-weight: 500;
   color: rgb(21, 21, 21, 0.7);
   text-overflow: ellipsis;
   overflow: hidden;
-  line-clamp: 3;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -57,9 +59,10 @@
 
 .profile__edit-btn:hover {
   opacity: 70%;
+  cursor: pointer;
 }
 
-.edit-icon {
+.profile__edit-icon {
   margin-right: 8px;
 }
 
@@ -76,9 +79,11 @@
 
 .profile__add-btn:hover {
   opacity: 80%;
+  cursor: pointer;
+
 }
 
-.add-icon {
+.profile__add-icon {
   margin-right: 8px;
 }
 
