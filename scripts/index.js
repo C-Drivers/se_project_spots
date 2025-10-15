@@ -107,6 +107,7 @@ editProfileCloseBtn.addEventListener("click", function () {
 });
 
 newPostBtn.addEventListener("click", function () {
+  resetValidation(newPostForm, [newPostLink, newPostCap], settings);
   openModal(newPostModal);
 });
 
