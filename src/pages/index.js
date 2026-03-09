@@ -1,3 +1,17 @@
+import "./index.css";
+import {
+  enableValidation,
+  settings,
+  resetValidation,
+  showInputError,
+  hideInputError,
+  checkInputValidity,
+  hasInvalidInput,
+  toggleButtonState,
+  disableButton,
+  setEventListeners,
+} from "../scripts/validation.js";
+
 const initialCards = [
   {
     name: "Golden Gate Bridge",
@@ -43,7 +57,7 @@ const editProfileCloseBtn = editProfileModal.querySelector(".modal__close-btn");
 const editProfileForm = editProfileModal.querySelector(".modal__form");
 const editProfileNameInput = editProfileModal.querySelector("#card-name-input");
 const editProfileDescInput = editProfileModal.querySelector(
-  "#profile-description-input"
+  "#profile-description-input",
 );
 const profileNameElement = document.querySelector(".profile__name");
 const profileDescElement = document.querySelector(".profile__description");
@@ -71,7 +85,7 @@ editProfileBtn.addEventListener("click", function () {
   resetValidation(
     editProfileForm,
     [editProfileNameInput, editProfileDescInput],
-    settings
+    settings,
   );
   openModal(editProfileModal);
 });
@@ -183,3 +197,12 @@ function escapeModal(modal) {
 escapeModal(editProfileModal);
 escapeModal(newPostModal);
 escapeModal(modalPreview);
+enableValidation(settings);
+resetValidation;
+showInputError;
+hideInputError;
+checkInputValidity;
+hasInvalidInput;
+toggleButtonState;
+disableButton;
+setEventListeners;
