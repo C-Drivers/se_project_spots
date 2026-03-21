@@ -11,6 +11,7 @@ import {
   disableButton,
   setEventListeners,
 } from "../scripts/validation.js";
+import Api from "../utils/Api.js";
 
 const initialCards = [
   {
@@ -50,17 +51,24 @@ const previewImage = modalPreview.querySelector(".modal__image");
 const previewCloseBtn = modalPreview.querySelector(".modal__close-btn-preview");
 const previewCaption = modalPreview.querySelector(".modal__caption");
 
+//Avatar Modal Selectors
+const avatarModalBtn = document.querySelector(".profile__avatar-btn");
+const avatarModal = document.querySelector("#avatar-modal");
+const avatarForm = avatarModal.querySelector(".modal__form");
+const avatarModalCloseBtn = avatarModal.querySelector(".modal__close-btn");
+const avatarModalSaveBtn = avatarModal.querySelector(".modal__save-btn");
+const avatarInput = avatarModal.querySelector("#profile-avatar-input");
+
 //Edit Profile Selectors
 const editProfileBtn = document.querySelector(".profile__edit-btn");
 const editProfileModal = document.querySelector("#edit-profile-modal");
 const editProfileCloseBtn = editProfileModal.querySelector(".modal__close-btn");
 const editProfileForm = editProfileModal.querySelector(".modal__form");
 const editProfileNameInput = editProfileModal.querySelector("#card-name-input");
-const editProfileDescInput = editProfileModal.querySelector(
-  "#profile-description-input",
-);
+const editProfileDescInput = editProfileModal.querySelector("#profile-description-input");
 const profileNameElement = document.querySelector(".profile__name");
 const profileDescElement = document.querySelector(".profile__description");
+const profileImageElement = document.querySelector(".profile__avatar");
 
 //Open & Close Modal Functions
 function openModal(modal) {
@@ -72,10 +80,25 @@ function closeModal(modal) {
 
 function handleEditProfileSubmit(evt) {
   evt.preventDefault();
-  profileNameElement.textContent = editProfileNameInput.value;
-  profileDescElement.textContent = editProfileDescInput.value;
-  closeModal(editProfileModal);
+  api.editUserInfo({name: editProfileNameInput.value, about: editProfileDescInput.value})
+  .then((data)=>{
+    profileNameElement.textContent = data.value;
+    profileDescElement.textContent = data.value;
+    closeModal(editProfileModal);
+})
+  .catch(console.error);
 }
+
+//Avatar Modal Functions
+avatarModalBtn.addEventListener("click", function () {
+  openModal(avatarModal);
+});
+
+avatarModalCloseBtn.addEventListener("click", function () {
+  closeModal(avatarModal);
+});
+
+avatarForm.addEventListener("submit", avatarHandleSubmit)
 
 editProfileForm.addEventListener("submit", handleEditProfileSubmit);
 
@@ -112,6 +135,16 @@ function handleNewPostSubmit(evt) {
   newPostForm.reset();
   disableButton(newSaveBtn);
   closeModal(newPostModal);
+}
+
+//Avatar Handle Submit
+function avatarHandleSubmit(evt){
+  evt.preventDefault();
+  api.editAvatarInfo(avatarInput.value)
+  .then((data)=>{
+    console.log(data);
+  })
+  .catch(console.error);
 }
 
 newPostForm.addEventListener("submit", handleNewPostSubmit);
@@ -165,11 +198,6 @@ function getCardElement(data) {
   return cardElement;
 }
 
-initialCards.forEach(function (item) {
-  const getCard = getCardElement(item);
-  cardsList.append(getCard);
-});
-
 previewCloseBtn.addEventListener("click", () => {
   closeModal(modalPreview);
 });
@@ -193,6 +221,28 @@ function escapeModal(modal) {
     }
   });
 }
+
+//API Class
+const api = new Api({
+  baseUrl: "https://around-api.en.tripleten-services.com/v1",
+  headers: {
+    authorization: "f4360fd5-b681-46f2-9578-9f987629f3bb",
+    "Content-Type": "application/json",
+  },
+});
+
+api
+  .getAppInfo()
+  .then(([cards, user]) => {
+    cards.forEach(function (item) {
+      const getCard = getCardElement(item);
+      cardsList.append(getCard);
+    });
+    profileNameElement.textContent = user.name;
+    profileDescElement.textContent = user.about;
+    profileImageElement.src = user.avatar
+  })
+  .catch((err)=>{console.error(err)});
 
 escapeModal(editProfileModal);
 escapeModal(newPostModal);
