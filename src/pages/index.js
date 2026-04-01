@@ -12,6 +12,7 @@ import {
   setEventListeners,
 } from "../scripts/validation.js";
 import Api from "../utils/Api.js";
+import { setBtnText } from "../utils/helpers.js";
 
 const initialCards = [
   {
@@ -51,6 +52,12 @@ const previewImage = modalPreview.querySelector(".modal__image");
 const previewCloseBtn = modalPreview.querySelector(".modal__close-btn-preview");
 const previewCaption = modalPreview.querySelector(".modal__caption");
 
+//Delete Modal
+const deleteModal = document.querySelector("#delete-modal");
+const deleteForm = deleteModal.querySelector("#delete-form");
+const deleteBtn = deleteModal.querySelector(".modal__save-btn");
+const cancelBtn = deleteModal.querySelector(".modal__cancel-btn");
+
 //Avatar Modal Selectors
 const avatarModalBtn = document.querySelector(".profile__avatar-btn");
 const avatarModal = document.querySelector("#avatar-modal");
@@ -65,12 +72,15 @@ const editProfileModal = document.querySelector("#edit-profile-modal");
 const editProfileCloseBtn = editProfileModal.querySelector(".modal__close-btn");
 const editProfileForm = editProfileModal.querySelector(".modal__form");
 const editProfileNameInput = editProfileModal.querySelector("#card-name-input");
-const editProfileDescInput = editProfileModal.querySelector("#profile-description-input");
+const editProfileDescInput = editProfileModal.querySelector(
+  "#profile-description-input",
+);
+
 const profileNameElement = document.querySelector(".profile__name");
 const profileDescElement = document.querySelector(".profile__description");
 const profileImageElement = document.querySelector(".profile__avatar");
 
-//Open & Close Modal Functions
+//Open & Close Modal Functions ------------------------
 function openModal(modal) {
   modal.classList.add("modal_is-opened");
 }
@@ -80,14 +90,24 @@ function closeModal(modal) {
 
 function handleEditProfileSubmit(evt) {
   evt.preventDefault();
-  api.editUserInfo({name: editProfileNameInput.value, about: editProfileDescInput.value})
-  .then((data)=>{
-    profileNameElement.textContent = data.value;
-    profileDescElement.textContent = data.value;
-    closeModal(editProfileModal);
-})
-  .catch(console.error);
+  const submitBtn = evt.submitter;
+  api
+    .editUserInfo({
+      name: editProfileNameInput.value,
+      about: editProfileDescInput.value,
+    })
+    .then((data) => {
+      profileNameElement.textContent = data.name;
+      profileDescElement.textContent = data.about;
+      closeModal(editProfileModal);
+    })
+    .catch(console.error)
+    .finally(()=>{
+      setBtnText(submitBtn, true)
+    });
 }
+//Open & Close Modal Functions End --------------------
+
 
 //Avatar Modal Functions
 avatarModalBtn.addEventListener("click", function () {
@@ -98,8 +118,25 @@ avatarModalCloseBtn.addEventListener("click", function () {
   closeModal(avatarModal);
 });
 
-avatarForm.addEventListener("submit", avatarHandleSubmit)
+avatarForm.addEventListener("submit", avatarHandleSubmit);
+//Avatar Modal Functions End
 
+
+//Avatar Handle Submit
+function avatarHandleSubmit(evt) {
+  evt.preventDefault();
+  api
+    .editAvatarInfo(avatarInput.value)
+    .then(({ avatar }) => {
+      console.log(profileImageElement, avatar);
+      profileImageElement.src = avatar;
+    })
+    .catch(console.error);
+}
+//Avatar Handle Submit End
+
+
+//Edit Profile Form / Button -----------------------------------------
 editProfileForm.addEventListener("submit", handleEditProfileSubmit);
 
 editProfileBtn.addEventListener("click", function () {
@@ -112,8 +149,11 @@ editProfileBtn.addEventListener("click", function () {
   );
   openModal(editProfileModal);
 });
+//Edit Profile Form / Button End -----------------------------------------
 
-//New Post Selectors / Functions
+
+
+//New Post Selectors / Functions ---------------------------------------
 const newPostBtn = document.querySelector(".profile__add-btn");
 const newPostModal = document.querySelector("#new-post-modal");
 const newPostCloseBtn = newPostModal.querySelector(".modal__close-btn");
@@ -137,16 +177,6 @@ function handleNewPostSubmit(evt) {
   closeModal(newPostModal);
 }
 
-//Avatar Handle Submit
-function avatarHandleSubmit(evt){
-  evt.preventDefault();
-  api.editAvatarInfo(avatarInput.value)
-  .then((data)=>{
-    console.log(data);
-  })
-  .catch(console.error);
-}
-
 newPostForm.addEventListener("submit", handleNewPostSubmit);
 
 editProfileCloseBtn.addEventListener("click", function () {
@@ -161,13 +191,49 @@ newPostBtn.addEventListener("click", function () {
 newPostCloseBtn.addEventListener("click", function () {
   closeModal(newPostModal);
 });
+//New Post Selectors / Functions End ---------------------------------------
 
-//Card Template
+//Delete Card Handler && Submission -------------
+let selectedCard, selectedCardId;
+
+function handleDeleteCard(cardElement, cardId){
+  selectedCard = cardElement;
+  selectedCardId = cardId;
+  openModal(deleteModal);
+}
+
+function handleDeleteSubmit(evt){
+  evt.preventDefault();
+  api
+  .deleteCard(selectedCardId)
+  .then(
+    selectedCard.remove(),
+    closeModal(deleteModal)
+  )
+  .catch(console.error);
+}
+
+deleteForm.addEventListener("submit", handleDeleteSubmit);
+
+
+//Delete Card Handler && Submission End ---------
+
+//Card Template / Like / Delete Functions ---------------------------------------------------------
 const cardTemplate = document
   .querySelector("#card-template")
   .content.querySelector(".card");
 
 const cardsList = document.querySelector(".cards__list");
+
+//Handle Like Function --------------------
+function handleLike(evt, id){
+  // remove - evt.target.classList.toggle("card__like-btn_active");
+  //1. check card like status with variable (i.e. isLiked = false)
+  //2. call the API function with arguments
+  //3. handle response
+  //4. in the .then toggle active class
+}
+//Handle Like Function End ----------------
 
 function getCardElement(data) {
   const cardElement = cardTemplate.cloneNode(true);
@@ -176,14 +242,23 @@ function getCardElement(data) {
   const cardLikeBtn = cardElement.querySelector(".card__like-btn");
   const cardDeleteBtn = cardElement.querySelector(".card__delete-btn");
 
-  cardLikeBtn.addEventListener("click", () => {
-    cardLikeBtn.classList.toggle("card__like-btn_active");
+// TODO -- if the card is liked, set active class on the card
+
+  //Like Button
+  cardLikeBtn.addEventListener("click", (evt) => handleLike(evt, data._id));
+
+  //Delete Card Button
+  cardDeleteBtn.addEventListener("click", (evt) => {
+    evt.preventDefault();
+    handleDeleteCard(cardElement, data._id)
   });
 
-  cardDeleteBtn.addEventListener("click", () => {
-    cardElement.remove();
+  //Cancel Button
+  cancelBtn.addEventListener("click", () => {
+    closeModal(deleteModal);
   });
 
+  //Preview
   cardImgElement.addEventListener("click", () => {
     openModal(modalPreview);
     previewImage.src = data.link;
@@ -197,7 +272,10 @@ function getCardElement(data) {
 
   return cardElement;
 }
+//Card Template / Like / Delete Functions End -----------------------------------------------------
 
+
+//Main Event Listeners -----------------------------------------
 previewCloseBtn.addEventListener("click", () => {
   closeModal(modalPreview);
 });
@@ -221,8 +299,10 @@ function escapeModal(modal) {
     }
   });
 }
+//Main Event Listeners End -------------------------------------
 
-//API Class
+
+//API Class -------------------------------------------------------
 const api = new Api({
   baseUrl: "https://around-api.en.tripleten-services.com/v1",
   headers: {
@@ -240,10 +320,14 @@ api
     });
     profileNameElement.textContent = user.name;
     profileDescElement.textContent = user.about;
-    profileImageElement.src = user.avatar
+    profileImageElement.src = user.avatar;
   })
-  .catch((err)=>{console.error(err)});
+  .catch((err) => {
+    console.error(err);
+  });
+//API Class End ---------------------------------------------------
 
+//MISC. Functions --------------
 escapeModal(editProfileModal);
 escapeModal(newPostModal);
 escapeModal(modalPreview);
@@ -256,3 +340,4 @@ hasInvalidInput;
 toggleButtonState;
 disableButton;
 setEventListeners;
+//MISC. Functions End ----------

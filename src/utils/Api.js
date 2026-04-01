@@ -1,6 +1,6 @@
 //API Class
 class Api {
-  constructor({ baseUrl, headers}) {
+  constructor({ baseUrl, headers }) {
     this._baseUrl = baseUrl;
     this._headers = headers;
   }
@@ -10,24 +10,28 @@ class Api {
   }
 
   getInitialCards() {
-    return fetch(`${this._baseUrl}/cards`, {headers: this._headers})
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Error: ${res.status}`);
-    });
+    return fetch(`${this._baseUrl}/cards`, { headers: this._headers }).then(
+      (res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        return Promise.reject(`Error: ${res.status}`);
+      },
+    );
   }
 
-  getUserInfo(){
-    return fetch(`${this._baseUrl}/users/me`, {headers: this._headers})
-    .then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      return Promise.reject(`Error: ${res.status}`);
-    });
+  getUserInfo() {
+    return fetch(`${this._baseUrl}/users/me`, { headers: this._headers }).then(
+      (res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        return Promise.reject(`Error: ${res.status}`);
+      },
+    );
   }
+
+  //TODO -- POST CARD function
 
   editUserInfo({ name, about }) {
     return fetch(`${this._baseUrl}/users/me`, {
@@ -51,8 +55,32 @@ class Api {
       headers: this._headers,
       // Send the data in the body as a JSON string.
       body: JSON.stringify({
-        avatar
+        avatar,
       }),
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return Promise.reject(`Error: ${res.status}`);
+    });
+  }
+
+  deleteCard(id) {
+    return fetch(`${this._baseUrl}/cards/${id}`, {
+      method: "DELETE",
+      headers: this._headers,
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return Promise.reject(`Error: ${res.status}`);
+    });
+  }
+
+likeStatus(id, isLiked) {
+    return fetch(`${this._baseUrl}/cards/${id}/likes`, {
+      method: isLiked ? "DELETE": "PUT",
+      headers: this._headers,
     }).then((res) => {
       if (res.ok) {
         return res.json();
@@ -63,4 +91,3 @@ class Api {
 }
 
 export default Api;
-
