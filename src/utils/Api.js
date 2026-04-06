@@ -9,17 +9,6 @@ class Api {
     return Promise.all([this.getInitialCards(), this.getUserInfo()]);
   }
 
-  getInitialCards() {
-    return fetch(`${this._baseUrl}/cards`, { headers: this._headers }).then(
-      (res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        return Promise.reject(`Error: ${res.status}`);
-      },
-    );
-  }
-
   getUserInfo() {
     return fetch(`${this._baseUrl}/users/me`, { headers: this._headers }).then(
       (res) => {
@@ -31,7 +20,16 @@ class Api {
     );
   }
 
-  //TODO -- POST CARD function
+  getInitialCards() {
+    return fetch(`${this._baseUrl}/cards`, {
+      headers: this._headers,
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return Promise.reject(`Error: ${res.status}`);
+    });
+  }
 
   editUserInfo({ name, about }) {
     return fetch(`${this._baseUrl}/users/me`, {
@@ -53,7 +51,6 @@ class Api {
     return fetch(`${this._baseUrl}/users/me/avatar`, {
       method: "PATCH",
       headers: this._headers,
-      // Send the data in the body as a JSON string.
       body: JSON.stringify({
         avatar,
       }),
@@ -77,10 +74,26 @@ class Api {
     });
   }
 
-likeStatus(id, isLiked) {
+  likeStatus(id, isLiked) {
     return fetch(`${this._baseUrl}/cards/${id}/likes`, {
-      method: isLiked ? "DELETE": "PUT",
+      method: isLiked ? "DELETE" : "PUT",
       headers: this._headers,
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      return Promise.reject(`Error: ${res.status}`);
+    });
+  }
+
+  addCard({ name, link }) {
+    return fetch(`${this._baseUrl}/cards`, {
+      method: "POST",
+      headers: this._headers,
+      body: JSON.stringify({
+        name,
+        link,
+      }),
     }).then((res) => {
       if (res.ok) {
         return res.json();
