@@ -1,53 +1,14 @@
 import "./index.css";
 import {
-  enableValidation,
   settings,
   resetValidation,
-  showInputError,
-  hideInputError,
-  checkInputValidity,
-  hasInvalidInput,
-  toggleButtonState,
   disableButton,
-  setEventListeners,
 } from "../scripts/validation.js";
 import Api from "../utils/Api.js";
 import { setBtnText } from "../utils/helpers.js";
 
-// const initialCards = [
-//   {
-//     name: "Golden Gate Bridge",
-//     link: "https://practicum-content.s3.us-west-1.amazonaws.com/software-engineer/spots/7-photo-by-griffin-wooldridge-from-pexels.jpg",
-//   },
-//   {
-//     name: "Los Angeles",
-//     link: "https://images.unsplash.com/photo-1572975165711-e9636eba67fc?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     name: "San Diego",
-//     link: "https://images.unsplash.com/photo-1583133010806-4368fdcb29e0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     name: "Seattle",
-//     link: "https://images.unsplash.com/photo-1549092273-8b23dde8ac2b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     name: "Nashville",
-//     link: "https://images.unsplash.com/photo-1698323363518-a7681b81a9d7?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     name: "Sedona",
-//     link: "https://images.unsplash.com/photo-1583729476095-82e61108a043?q=80&w=2007&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-//   {
-//     name: "Honolulu",
-//     link: "https://images.unsplash.com/photo-1573992554018-83e7853bd45f?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-//   },
-// ];
-
 //Preview Modal Selectors
 const modalPreview = document.querySelector("#preview-modal");
-const previewContainer = modalPreview.querySelector(".modal__image-container");
 const previewImage = modalPreview.querySelector(".modal__image");
 const previewCloseBtn = modalPreview.querySelector(".modal__close-btn-preview");
 const previewCaption = modalPreview.querySelector(".modal__caption");
@@ -55,7 +16,6 @@ const previewCaption = modalPreview.querySelector(".modal__caption");
 //Delete Modal
 const deleteModal = document.querySelector("#delete-modal");
 const deleteForm = deleteModal.querySelector("#delete-form");
-const deleteBtn = deleteModal.querySelector(".modal__save-btn");
 const cancelBtn = deleteModal.querySelector(".modal__cancel-btn");
 const deleteCloseBtn = deleteModal.querySelector(".modal__close-btn-delete");
 
@@ -64,7 +24,6 @@ const avatarModalBtn = document.querySelector(".profile__avatar-btn");
 const avatarModal = document.querySelector("#avatar-modal");
 const avatarForm = avatarModal.querySelector(".modal__form");
 const avatarModalCloseBtn = avatarModal.querySelector(".modal__close-btn");
-const avatarModalSaveBtn = avatarModal.querySelector(".modal__save-btn");
 const avatarInput = avatarModal.querySelector("#profile-avatar-input");
 
 //Edit Profile Selectors
@@ -167,6 +126,7 @@ function handleNewPostSubmit(evt) {
       disableButton(newSaveBtn);
       closeModal(newPostModal);
     })
+    .catch(console.error)
     .finally(() => {
       setBtnText(submitBtn, false);
     });
@@ -194,6 +154,7 @@ const cardTemplate = document
   .content.querySelector(".card");
 
 const cardsList = document.querySelector(".cards__list");
+//cardElement.remove();
 
 function getCardElement(data) {
   const cardElement = cardTemplate.cloneNode(true);
@@ -211,16 +172,6 @@ function getCardElement(data) {
     handleDeleteCard(cardElement, data._id);
   });
 
-  //Cancel Button
-  cancelBtn.addEventListener("click", () => {
-    closeModal(deleteModal);
-  });
-
-  //Close Button
-  deleteCloseBtn.addEventListener("click", () => {
-    closeModal(deleteModal);
-  });
-
   //Preview
   cardImgElement.addEventListener("click", () => {
     openModal(modalPreview);
@@ -232,17 +183,30 @@ function getCardElement(data) {
   cardImgElement.src = data.link;
   cardImgElement.alt = data.name;
   cardTitleElement.textContent = data.name;
-
+  const cardLiked = data.isLiked;
+  if (cardLiked) {
+    cardLikeBtn.classList.add("card__like-btn_active");
+  }
   return cardElement;
 }
 //Card Template / Like / Delete Functions End -----------------------------------------------------
+
+//Close Button
+deleteCloseBtn.addEventListener("click", () => {
+  closeModal(deleteModal);
+});
+
+//Cancel Button
+cancelBtn.addEventListener("click", () => {
+  closeModal(deleteModal);
+});
 
 //Handle Like Function --------------------
 function handleLike(evt, id) {
   const isLiked = evt.target.classList.contains("card__like-btn_active");
   api
     .likeStatus(id, isLiked)
-    .then((res) => {
+    .then(() => {
       evt.target.classList.toggle("card__like-btn_active");
     })
     .catch(console.error);
@@ -261,11 +225,13 @@ function clickOutside(modal) {
   });
 }
 
+//Click Outside Modal Functions ----------------
 clickOutside(editProfileModal);
 clickOutside(newPostModal);
 clickOutside(modalPreview);
 clickOutside(deleteModal);
 clickOutside(avatarModal);
+//Click Outside Modal Functions End ------------
 
 function escapeModal(modal) {
   document.addEventListener("keydown", (escapeKey) => {
@@ -352,18 +318,3 @@ function avatarHandleSubmit(evt) {
     });
 }
 //Avatar Handle Submit End
-
-//MISC. Functions --------------
-escapeModal(editProfileModal);
-escapeModal(newPostModal);
-escapeModal(modalPreview);
-enableValidation(settings);
-resetValidation;
-showInputError;
-hideInputError;
-checkInputValidity;
-hasInvalidInput;
-toggleButtonState;
-disableButton;
-setEventListeners;
-//MISC. Functions End ----------
